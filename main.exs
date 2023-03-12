@@ -1,0 +1,7 @@
+os_release = File.read!("/etc/os-release")
+             |> String.split(["\n", "="], [trim: true])
+             |> Enum.chunk_every(2)
+             |> Map.new(fn [k, v] -> {k, v} end)
+uptime = File.read!("/proc/uptime") 
+shell = System.get_env("SHELL")
+version = File.read!("/proc/version") 
