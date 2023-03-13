@@ -11,3 +11,7 @@ uptime = File.read!("/proc/uptime")
 shell = System.get_env("SHELL")
 version = File.read!("/proc/sys/kernel/osrelease")
           |> String.trim
+mem = File.read!("/proc/meminfo")
+      |> then(fn x ->
+      Regex.named_captures(~r/^MemTotal:\s*(?<all>\d+)\X*^MemFree:\s*(?<free>\d+)/m, x) end)
+      |> Map.new(fn {k, v} -> {k, String.to_integer(v) |> div(1024)} end)
