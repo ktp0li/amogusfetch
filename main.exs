@@ -6,5 +6,7 @@ uptime = File.read!("/proc/uptime")
          |> String.split(" ")
          |> hd 
          |> String.to_float
+         |> round
+         |> then(fn sec -> Time.add(~T[00:00:00], sec, :second) end)
 shell = System.get_env("SHELL")
 version = File.read!("/proc/version") 
