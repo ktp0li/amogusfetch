@@ -10,7 +10,7 @@ uptime =
   |> hd
   |> String.to_float()
   |> round
-  |> then(fn sec -> Time.add(~T[00:00:00], sec, :second) end)
+  |> then(&Time.add(~T[00:00:00], &1, :second))
 
 shell = System.get_env("SHELL")
 
@@ -20,14 +20,12 @@ version =
 
 mem =
   File.read!("/proc/meminfo")
-  |> then(fn x ->
-    Regex.named_captures(~r/^MemTotal:\s*(?<all>\d+)\X*^MemFree:\s*(?<free>\d+)/m, x)
-  end)
+  |> then(&Regex.named_captures(~r/^MemTotal:\s*(?<all>\d+)\X*^MemFree:\s*(?<free>\d+)/m, &1))
   |> Map.new(fn {k, v} -> {k, String.to_integer(v) |> div(1024)} end)
 
 cpu =
   File.read!("/proc/cpuinfo")
-  |> then(fn x -> Regex.run(~r/^model name\W*(\N+)/m, x, capture: :all_but_first) end)
+  |> then(&Regex.run(~r/^model name\W*(\N+)/m, &1, capture: :all_but_first))
   |> List.to_string()
   |> String.downcase()
 
