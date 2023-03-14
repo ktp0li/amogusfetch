@@ -15,3 +15,7 @@ mem = File.read!("/proc/meminfo")
       |> then(fn x ->
       Regex.named_captures(~r/^MemTotal:\s*(?<all>\d+)\X*^MemFree:\s*(?<free>\d+)/m, x) end)
       |> Map.new(fn {k, v} -> {k, String.to_integer(v) |> div(1024)} end)
+cpu = File.read!("/proc/cpuinfo")
+      |> then(fn x -> Regex.run(~r/^model name\W*(\N+)/m, x, capture: :all_but_first) end)
+      |> List.to_string
+      |> String.downcase
