@@ -1,36 +1,59 @@
-os_release =
-  File.read!("/etc/os-release")
-  |> String.split(["\n", "="], trim: true)
-  |> Enum.chunk_every(2)
-  |> Map.new(fn [k, v] -> {k, v} end)
+defmodule Amogusfetch do
+  defp os_release do
+    File.read!("/etc/os-release")
+    |> String.split(["\n", "="], trim: true)
+    |> Enum.chunk_every(2)
+    |> Map.new(fn [k, v] -> {k, v} end)
+  end
 
-uptime =
-  File.read!("/proc/uptime")
-  |> String.split(" ")
-  |> hd
-  |> String.to_float()
-  |> round
-  |> then(&Time.add(~T[00:00:00], &1, :second))
+  defp uptime do
+    File.read!("/proc/uptime")
+    |> String.split(" ")
+    |> hd
+    |> String.to_float()
+    |> round
+    |> then(&Time.add(~T[00:00:00], &1, :second))
+  end
 
-shell = System.get_env("SHELL")
+  defp shell, do: System.get_env("SHELL")
 
-version =
-  File.read!("/proc/sys/kernel/osrelease")
-  |> String.trim()
+  defp version do
+    File.read!("/proc/sys/kernel/osrelease")
+    |> String.trim()
+  end
 
-mem =
-  File.read!("/proc/meminfo")
-  |> then(&Regex.named_captures(~r/^MemTotal:\s*(?<all>\d+)\X*^MemFree:\s*(?<free>\d+)/m, &1))
-  |> Map.new(fn {k, v} -> {k, String.to_integer(v) |> div(1024)} end)
+  defp mem do
+    File.read!("/proc/meminfo")
+    |> then(&Regex.named_captures(~r/^MemTotal:\s*(?<all>\d+)\X*^MemFree:\s*(?<free>\d+)/m, &1))
+    |> Map.new(fn {k, v} -> {k, String.to_integer(v) |> div(1024)} end)
+  end
 
-cpu =
-  File.read!("/proc/cpuinfo")
-  |> then(&Regex.run(~r/^model name\W*(\N+)/m, &1, capture: :all_but_first))
-  |> List.to_string()
-  |> String.downcase()
+  defp cpu do
+    File.read!("/proc/cpuinfo")
+    |> then(&Regex.run(~r/^model name\W*(\N+)/m, &1, capture: :all_but_first))
+    |> List.to_string()
+    |> String.downcase()
+  end
 
-user = System.get_env("USER")
+  defp user, do: System.get_env("USER")
 
-hostname =
-  File.read!("/etc/hostname")
-  |> String.trim()
+  defp hostname do
+    File.read!("/etc/hostname")
+    |> String.trim()
+  end
+
+  def start do
+    IO.puts(
+      "os: #{os_release()["ID"]}\n" <>
+        "version: #{version()}\n" <>
+        "mem: #{mem()["free"]}/#{mem()["all"]} mib\n" <>
+        "cpu: #{cpu()}\n" <>
+        "hostname: #{hostname()}\n" <>
+        "uptime: #{uptime()}\n" <>
+        "user: #{user()}\n" <>
+        "shell: #{shell()}"
+    )
+  end
+end
+
+Amogusfetch.start()
