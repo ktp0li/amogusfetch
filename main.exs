@@ -42,18 +42,23 @@ defmodule Amogusfetch do
     |> String.trim()
   end
 
-  def start do
+  defp colors do
+    Enum.map(1..7, fn x -> "\x1b[#{40 + x}m   \x1b[0m" end)
+    |> List.to_string
+  end
+
+  def debug do
     IO.puts(
-      "os: #{os_release()["ID"]}\n" <>
-        "version: #{version()}\n" <>
-        "mem: #{mem()["free"]}/#{mem()["all"]} mib\n" <>
-        "cpu: #{cpu()}\n" <>
-        "hostname: #{hostname()}\n" <>
-        "uptime: #{uptime()}\n" <>
-        "user: #{user()}\n" <>
-        "shell: #{shell()}"
+    "\x1b[1m#{user()}@#{hostname()}\x1b[0m\n" <>
+    "os: #{os_release()["ID"]}\n" <>
+    "version: #{version()}\n" <>
+    "mem: #{mem()["free"]}/#{mem()["all"]} mib\n" <>
+    "cpu: #{cpu()}\n" <>
+    "uptime: #{uptime()}\n" <>
+    "shell: #{shell()}\n" <>
+    "colors: #{colors()}"
     )
   end
 end
 
-Amogusfetch.start()
+Amogusfetch.debug()
