@@ -33,6 +33,7 @@ defmodule Amogusfetch do
     |> then(&Regex.run(~r/^model name\W*(\N+)/m, &1, capture: :all_but_first))
     |> List.to_string()
     |> String.downcase()
+    |> String.replace(["intel(r) core(tm) ", "cpu ", "amd"], "")
   end
 
   defp user, do: System.get_env("USER")
@@ -44,21 +45,46 @@ defmodule Amogusfetch do
 
   defp colors do
     Enum.map(1..7, fn x -> "\x1b[#{40 + x}m   \x1b[0m" end)
-    |> List.to_string
+    |> List.to_string()
   end
 
-  def debug do
-    IO.puts(
-    "\x1b[1m#{user()}@#{hostname()}\x1b[0m\n" <>
-    "os: #{os_release()["ID"]}\n" <>
-    "version: #{version()}\n" <>
-    "mem: #{mem()["free"]}/#{mem()["all"]} mib\n" <>
-    "cpu: #{cpu()}\n" <>
-    "uptime: #{uptime()}\n" <>
-    "shell: #{shell()}\n" <>
-    "colors: #{colors()}"
-    )
+  def picture(fir \\ 0, sec \\ 0) do
+    win = "\x1b[#{sec}m"
+    clear = "\x1b[0m"
+    body = "\x1b[#{fir}m"
+
+    [
+      "      #{body}.mmmmmmmmmmmmmmm.#{clear}        ",
+      " #{win}.+oooooooooooo+.#{clear}#{body}     'm.#{clear}      ",
+      "#{win}oooooooooooooooooo#{clear}#{body}       mmmmm.#{clear}",
+      "#{win}oooooooooooooooooo#{clear}#{body}       m::::m#{clear}",
+      " #{win}'\"+oooooooooo+\"'#{clear}#{body}        m::::m#{clear}",
+      "     #{body}m                   m::::m#{clear}",
+      "     #{body}m   +mmmmmmm.       mmmmm'#{clear}",
+      "     #{body}m    'm     'm      m#{clear}     ",
+      "     #{body}.mmmm.#{clear}        #{body}.mmmm.#{clear}      "
+    ]
+  end
+
+  def values do
+    clear = "\x1b[0m"
+    bold = "\x1b[1m" 
+
+    [
+      "#{bold}#{user()}@#{hostname()}#{clear}\n",
+        "os: #{os_release()["ID"]}\n",
+        "kernel: #{version()}\n",
+        "mem: #{mem()["free"]}/#{mem()["all"]} mib\n",
+        "cpu: #{cpu()}\n",
+        "uptime: #{uptime()}\n",
+        "shell: #{shell()}\n",
+        "#{colors()}\n", ""
+    ]
   end
 end
 
-Amogusfetch.debug()
+#Amogusfetch.picture(31, 36) |> Enum.map(fn x -> IO.puts(x) end)
+#IO.puts(Amogusfetch.values() |> List.to_string)
+
+Enum.zip([Amogusfetch.picture(31, 36), Amogusfetch.values()]) |>
+Enum.map(fn {x, y} -> x <> String.duplicate(" ", 5) <> y end) |> IO.puts()  
