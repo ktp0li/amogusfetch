@@ -13,6 +13,11 @@ defmodule Amogusfetch do
     |> String.to_float()
     |> round
     |> then(&Time.add(~T[00:00:00], &1, :second))
+    |> then(fn x ->
+      if(x.hour > 23, do: "#{div(x.hour, 24)}d", else: "") <>
+        if(0 < x.hour and x.hour < 24, do: "#{rem(x.hour, 24)}h", else: "") <>
+        if(x.hour == 0, do: "#{x.minute}m")
+    end)
   end
 
   defp shell, do: System.get_env("SHELL")
@@ -68,23 +73,25 @@ defmodule Amogusfetch do
 
   def values do
     clear = "\x1b[0m"
-    bold = "\x1b[1m" 
+    bold = "\x1b[1m"
 
     [
       "#{bold}#{user()}@#{hostname()}#{clear}\n",
-        "os: #{os_release()["ID"]}\n",
-        "kernel: #{version()}\n",
-        "mem: #{mem()["free"]}/#{mem()["all"]} mib\n",
-        "cpu: #{cpu()}\n",
-        "uptime: #{uptime()}\n",
-        "shell: #{shell()}\n",
-        "#{colors()}\n", ""
+      "os: #{os_release()["ID"]}\n",
+      "kernel: #{version()}\n",
+      "mem: #{mem()["free"]}/#{mem()["all"]} mib\n",
+      "cpu: #{cpu()}\n",
+      "uptime: #{uptime()}\n",
+      "shell: #{shell()}\n",
+      "#{colors()}\n",
+      ""
     ]
   end
 end
 
-#Amogusfetch.picture(31, 36) |> Enum.map(fn x -> IO.puts(x) end)
-#IO.puts(Amogusfetch.values() |> List.to_string)
+# Amogusfetch.picture(31, 36) |> Enum.map(fn x -> IO.puts(x) end)
+# IO.puts(Amogusfetch.values() |> List.to_string)
 
-Enum.zip([Amogusfetch.picture(31, 36), Amogusfetch.values()]) |>
-Enum.map(fn {x, y} -> x <> String.duplicate(" ", 5) <> y end) |> IO.puts()  
+Enum.zip([Amogusfetch.picture(31, 36), Amogusfetch.values()])
+|> Enum.map(fn {x, y} -> x <> String.duplicate(" ", 5) <> y end)
+|> IO.puts()
