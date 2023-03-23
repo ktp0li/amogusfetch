@@ -14,9 +14,9 @@ defmodule Amogusfetch do
     |> round
     |> then(&Time.add(~T[00:00:00], &1, :second))
     |> then(fn x ->
-      if(x.hour > 23, do: "#{div(x.hour, 24)}d", else: "") <>
-        if(0 < x.hour and x.hour < 24, do: "#{rem(x.hour, 24)}h", else: "") <>
-        if(x.hour == 0, do: "#{x.minute}m")
+      if(x.hour > 23, do: "#{div(x.hour, 24)}d ", else: "") <>
+        if(0 < x.hour and x.hour < 24, do: "#{rem(x.hour, 24)}h ", else: "") <>
+        "#{x.minute}m"
     end)
   end
 
@@ -63,7 +63,7 @@ defmodule Amogusfetch do
       " #{win}.+oooooooooooo+.#{clear}#{body}     'm.#{clear}      ",
       "#{win}oooooooooooooooooo#{clear}#{body}       mmmmm.#{clear}",
       "#{win}oooooooooooooooooo#{clear}#{body}       m::::m#{clear}",
-      " #{win}'\"+oooooooooo+\"'#{clear}#{body}        m::::m#{clear}",
+      " #{win}'+oooooooooooo+'#{clear}#{body}        m::::m#{clear}",
       "     #{body}m                   m::::m#{clear}",
       "     #{body}m   +mmmmmmm.       mmmmm'#{clear}",
       "     #{body}m    'm     'm      m#{clear}     ",
