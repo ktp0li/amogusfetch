@@ -1,4 +1,17 @@
 defmodule Amogusfetch do
+  def main do
+    {args, _, _} =
+      System.argv()
+      |> OptionParser.parse(
+        aliases: [b: :body_color, w: :window_color],
+        strict: [body_color: :integer, window_color: :integer]
+      )
+
+    Enum.zip([Amogusfetch.picture(args[:body_color], args[:window_color]), Amogusfetch.values()])
+    |> Enum.map(fn {x, y} -> x <> String.duplicate(" ", 5) <> y end)
+    |> IO.puts()
+  end
+
   defp os_release do
     File.read!("/etc/os-release")
     |> String.split(["\n", "="], trim: true)
@@ -89,9 +102,4 @@ defmodule Amogusfetch do
   end
 end
 
-# Amogusfetch.picture(31, 36) |> Enum.map(fn x -> IO.puts(x) end)
-# IO.puts(Amogusfetch.values() |> List.to_string)
-
-Enum.zip([Amogusfetch.picture(31, 36), Amogusfetch.values()])
-|> Enum.map(fn {x, y} -> x <> String.duplicate(" ", 5) <> y end)
-|> IO.puts()
+Amogusfetch.main()
