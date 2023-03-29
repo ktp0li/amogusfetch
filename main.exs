@@ -4,13 +4,15 @@ defmodule Amogusfetch do
       System.argv()
       |> OptionParser.parse(
         aliases: [b: :body_color, w: :window_color],
-        strict: [body_color: :integer, window_color: :integer]
+        strict: [body_color: :string, window_color: :string]
       )
 
     Enum.zip([Amogusfetch.picture(args[:body_color], args[:window_color]), Amogusfetch.values()])
     |> Enum.map(fn {x, y} -> x <> String.duplicate(" ", 5) <> y end)
     |> IO.puts()
   end
+
+  defp term, do: System.get_env("TERM") |> String.downcase()
 
   defp os_release do
     File.read!("/etc/os-release")
@@ -66,10 +68,19 @@ defmodule Amogusfetch do
     |> List.to_string()
   end
 
-  def picture(fir \\ 0, sec \\ 0) do
-    win = "\x1b[#{sec}m"
+  def picture(fir, sec) do
+    [fir, sec] = Enum.map([fir, sec], &String.to_atom(to_string(&1)))
+
+    colors =
+      Enum.zip(
+        ["gray", "red", "green", "yellow", "blue", "violet", "light_blue", "white"],
+        30..37
+      )
+      |> Enum.map(fn {x, y} -> {String.to_atom(x), y} end)
+
+    win = "\x1b[#{colors[sec]}m"
     clear = "\x1b[0m"
-    body = "\x1b[#{fir}m"
+    body = "\x1b[#{colors[fir]}m"
 
     [
       "      #{body}.mmmmmmmmmmmmmmm.#{clear}        ",
@@ -92,12 +103,12 @@ defmodule Amogusfetch do
       "#{bold}#{user()}@#{hostname()}#{clear}\n",
       "os: #{os_release()["ID"]}\n",
       "kernel: #{version()}\n",
-      "mem: #{mem()["free"]}/#{mem()["all"]} mib\n",
+      "mem: #{mem()["all"] - mem()["free"]}/#{mem()["all"]} mib\n",
       "cpu: #{cpu()}\n",
       "uptime: #{uptime()}\n",
       "shell: #{shell()}\n",
-      "#{colors()}\n",
-      ""
+      "term: #{term()}\n",
+      "#{colors()}"
     ]
   end
 end
